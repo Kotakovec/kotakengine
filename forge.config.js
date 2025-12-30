@@ -5,14 +5,14 @@ module.exports = {
   },
   rebuildConfig: {},
   makers: [
-    // Windows (.exe)
+    // Windows
     {
       name: '@electron-forge/maker-squirrel',
       config: {
         setupIcon: './assets/icon.ico',
       },
     },
-    // Ubuntu / Pop!_OS (.deb)
+    // Linux - Debian/Ubuntu
     {
       name: '@electron-forge/maker-deb',
       config: {
@@ -23,7 +23,7 @@ module.exports = {
         }
       },
     },
-    // Fedora (.rpm)
+    // Linux - Fedora/RedHat
     {
       name: '@electron-forge/maker-rpm',
       config: {
@@ -32,7 +32,7 @@ module.exports = {
         }
       },
     },
-    // Arch Linux a univerzální Linux (.AppImage)
+    // Linux - Arch a univerzální (AppImage)
     {
       name: '@electron-forge/maker-appimage',
       config: {
@@ -40,15 +40,6 @@ module.exports = {
           icon: './assets/icon.png'
         }
       },
-    },
-   // macOS (.dmg)
-    {
-      name: '@electron-forge/maker-dmg',
-      config: {
-        // Tento řádek jsme upravili, aby nehledal .icns, pokud ho nemáš
-        name: 'KotakEngine'
-      },
     }
   ],
 };
-
