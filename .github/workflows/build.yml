@@ -6,10 +6,11 @@ on:
 jobs:
   release:
     runs-on: ${{ matrix.os }}
+
     strategy:
-      fail-fast: false  # Tady říkáme, aby chybu na Linuxu neřešil Windows
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout code
