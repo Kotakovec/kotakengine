@@ -1,36 +1,53 @@
 module.exports = {
   packagerConfig: {
-    icon: './assets/icon' 
+    icon: './assets/icon',
+    name: 'KotakEngine'
   },
   rebuildConfig: {},
   makers: [
-    // Instalátor pro Windows (.exe)
+    // Windows (.exe)
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'KotakEngine',
         setupIcon: './assets/icon.ico',
-        iconUrl: 'https://raw.githubusercontent.com/kotakovec/kotakengine/main/assets/icon.ico'
       },
     },
-    // Instalátor pro Linux (Debian/Ubuntu - .deb)
+    // Ubuntu / Pop!_OS (.deb)
     {
       name: '@electron-forge/maker-deb',
       config: {
         options: {
-          icon: './assets/icon.png' // Linux používá .png
+          icon: './assets/icon.png',
+          maintainer: 'Jakub Kotoul',
+          homepage: 'https://kotakovec.github.io/kotakengine/'
         }
-      }
+      },
     },
-    // Instalátor pro Linux (Fedora/RedHat - .rpm)
+    // Fedora (.rpm)
     {
       name: '@electron-forge/maker-rpm',
-      config: {}
+      config: {
+        options: {
+          icon: './assets/icon.png'
+        }
+      },
     },
-    // Verze pro Mac (jen pokud bys to dělal na Macu)
+    // Arch Linux a univerzální Linux (.AppImage)
     {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
+      name: '@electron-forge/maker-appimage',
+      config: {
+        options: {
+          icon: './assets/icon.png'
+        }
+      },
+    },
+    // macOS (.dmg)
+    {
+      name: '@electron-forge/maker-dmg',
+      config: {
+        icon: './assets/icon.icns', // Mac má rád formát .icns, ale Forge si ho často umí udělat z png
+        name: 'KotakEngine'
+      },
     }
   ],
 };
