@@ -6,29 +6,34 @@ on:
 jobs:
   release:
     runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: false
       matrix:
+        # Tady říkáme GitHubu, aby spustil 3 různé počítače najednou
         os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Tady jsme dali v4
+        uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v4 # Tady jsme dali v4
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install dependencies
         run: npm install
 
+      # Tento krok doinstaluje nástroje pro Fedoru (.rpm), aby to na Linuxu neházelo chybu
+      - name: Install Linux build tools
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
+
       - name: Make application
         run: npm run make
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # Tady je ta nejdůležitější změna na v4
+        uses: actions/upload-artifact@v4
         with:
           name: KotakEngine-${{ matrix.os }}
           path: out/make/**/*
