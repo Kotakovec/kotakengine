@@ -1,3 +1,35 @@
-node_modules/
-out/
-.DS_Store
+name: Build KotakEngine
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Tady říkáme robotovi, aby spustil jeden Windows a jeden Linux
+        os: [windows-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      # Tento příkaz spustí 'electron-forge make' na obou systémech
+      - name: Make application
+        run: npm run make
+
+      # Tady robot vezme hotové soubory a nahraje je na web, abys je mohl stáhnout
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: KotakEngine-${{ matrix.os }}
+          path: out/make/**/*
