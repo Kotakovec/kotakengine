@@ -41,13 +41,14 @@ module.exports = {
         }
       },
     },
-    // macOS (.dmg)
+   // macOS (.dmg)
     {
       name: '@electron-forge/maker-dmg',
       config: {
-        icon: './assets/icon.icns', // Mac má rád formát .icns, ale Forge si ho často umí udělat z png
+        // Tento řádek jsme upravili, aby nehledal .icns, pokud ho nemáš
         name: 'KotakEngine'
       },
     }
   ],
 };
+
