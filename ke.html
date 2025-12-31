@@ -1,209 +1,172 @@
 <!doctype html>
 <html lang="cs">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>KotakEngine</title>
-		<style>
-			:root{--bg-top:#000000;--bg-bottom:#4b0082;--fg:#f6f6fb;--muted:rgba(246,246,251,0.7)}
-			html,body{height:100%;margin:0}
-			body{
-				font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-				color:var(--fg);
-				background:linear-gradient(180deg,var(--bg-top) 0%, var(--bg-bottom) 100%);
-				-webkit-font-smoothing:antialiased;
-				-moz-osx-font-smoothing:grayscale;
-				display:flex;
-				align-items:center;
-				justify-content:center;
-				position:relative;
-				overflow:hidden;
-			}
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>KotakEngine</title>
+        <style>
+            :root{--bg-top:#000000;--bg-bottom:#4b0082;--fg:#f6f6fb;--muted:rgba(246,246,251,0.7)}
+            html,body{height:100%;margin:0}
+            body{
+                font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+                color:var(--fg);
+                background:linear-gradient(180deg,var(--bg-top) 0%, var(--bg-bottom) 100%);
+                -webkit-font-smoothing:antialiased;
+                -moz-osx-font-smoothing:grayscale;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                position:relative;
+                overflow:hidden;
+            }
 
-			/* Center content */
-			.center {
-				text-align:center;
-				padding:24px;
-			}
+            /* Center content */
+            .center {
+                text-align:center;
+                padding:24px;
+            }
 
-			h1{
-				margin:0;
-				font-size:clamp(36px,8vw,96px);
-				letter-spacing:0.02em;
-				line-height:0.95;
-				font-weight:700;
-			}
+            h1{
+                margin:0;
+                font-size:clamp(36px,8vw,96px);
+                letter-spacing:0.02em;
+                line-height:0.95;
+                font-weight:700;
+            }
 
-			p.lead{
-				margin:12px 0 0 0;
-				font-size:clamp(14px,2.2vw,20px);
-				color:var(--muted);
-			}
+            p.lead{
+                margin:12px 0 0 0;
+                font-size:clamp(14px,2.2vw,20px);
+                color:var(--muted);
+            }
 
-			/* version badge in bottom-left */
-			.version {
-				position:fixed;
-				left:12px;
-				bottom:12px;
-				font-size:12px;
-				color:var(--muted);
-				user-select:none;
-				pointer-events:none;
-			}
+            /* version badge in bottom-left */
+            .version {
+                position:fixed;
+                left:12px;
+                bottom:12px;
+                font-size:12px;
+                color:var(--muted);
+                user-select:none;
+                pointer-events:none;
+            }
 
-			/* Continue button bottom center, initially hidden below viewport */
-			.continue-btn {
-				position:fixed;
-				left:50%;
-				bottom:20px;
-				transform:translateX(-50%) translateY(120px);
-				background:rgba(255,255,255,0.08);
-				border:1px solid rgba(255,255,255,0.12);
-				color:var(--fg);
-				padding:12px 22px;
-				font-size:16px;
-				border-radius:50px;
-				cursor:pointer;
-				backdrop-filter: blur(6px);
-				box-shadow:0 6px 18px rgba(75,0,130,0.25);
-				opacity:0;
-				transition:transform 600ms cubic-bezier(.2,.9,.2,1), opacity 400ms ease;
-			}
+            /* Continue button bottom center, initially hidden below viewport */
+            .continue-btn {
+                position:fixed;
+                left:50%;
+                bottom:20px;
+                transform:translateX(-50%) translateY(120px);
+                background:rgba(255,255,255,0.08);
+                border:1px solid rgba(255,255,255,0.12);
+                color:var(--fg);
+                padding:12px 22px;
+                font-size:16px;
+                border-radius:50px;
+                cursor:pointer;
+                backdrop-filter: blur(6px);
+                box-shadow:0 6px 18px rgba(75,0,130,0.25);
+                opacity:0;
+                transition:transform 600ms cubic-bezier(.2,.9,.2,1), opacity 400ms ease;
+            }
 
-			.continue-btn.visible{
-				transform:translateX(-50%) translateY(0);
-				opacity:1;
-			}
+            .continue-btn.visible{
+                transform:translateX(-50%) translateY(0);
+                opacity:1;
+            }
 
-			.continue-btn:focus{outline:2px solid rgba(255,255,255,0.12);outline-offset:2px}
-			.continue-btn:hover{transform:translateX(-50%) translateY(-4px)}
+            .continue-btn:focus{outline:2px solid rgba(255,255,255,0.12);outline-offset:2px}
+            .continue-btn:hover{transform:translateX(-50%) translateY(-4px)}
 
-			/* Reduced motion support */
-			@media (prefers-reduced-motion: reduce){
-				.continue-btn{transition:none}
-			}
+            /* Reduced motion support */
+            @media (prefers-reduced-motion: reduce){
+                .continue-btn{transition:none}
+            }
 
-				/* full screen transition overlay for smooth page exit
-				   now animates from bottom to top (translateY) so the
-				   screen darkens upward as the overlay rises */
-				.transition-overlay{
-					position:fixed;
-					left:0;right:0;top:0;bottom:0;
-					background:linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
-					/* start positioned below viewport */
-					transform:translateY(100%);
-					pointer-events:none;
-					transition:transform 600ms ease;
-					z-index:9999;
-				}
+            /* full screen transition overlay */
+            .transition-overlay{
+                position:fixed;
+                left:0;right:0;top:0;bottom:0;
+                background:linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
+                transform:translateY(100%);
+                pointer-events:none;
+                transition:transform 600ms ease;
+                z-index:9999;
+            }
 
-				.transition-overlay.show{
-					transform:translateY(0);
-					pointer-events:auto;
-				}
+            .transition-overlay.show{
+                transform:translateY(0);
+                pointer-events:auto;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="center" role="main">
+            <h1>KotakEngine</h1>
+            <p class="lead">Vítej v KotakEngine!</p>
+        </main>
 
-				/* left vertical dock (Ubuntu style) */
-				.dock{
-					position:fixed;
-					left:12px;
-					top:50%;
-					transform:translateY(-50%);
-					display:flex;
-					flex-direction:column;
-					gap:12px;
-					z-index:10000;
-				}
+        <div class="version">v1.0.0 BETA</div>
 
-				.dock a{
-					display:block;
-					width:56px;
-					height:56px;
-					border-radius:12px;
-					background:rgba(255,255,255,0.03);
-					border:1px solid rgba(255,255,255,0.06);
-					padding:6px;
-					box-sizing:border-box;
-					text-decoration:none;
-					display:flex;align-items:center;justify-content:center;
-					transition:transform 180ms ease, background 180ms ease;
-				}
+        <button id="continueBtn" class="continue-btn" aria-label="Pokračovat">Pokračovat</button>
 
-				.dock a:focus{outline:2px solid rgba(255,255,255,0.12);outline-offset:3px}
+        <div id="transitionOverlay" class="transition-overlay" aria-hidden="true"></div>
 
-				.dock a:hover{transform:translateX(6px) scale(1.03);background:rgba(255,255,255,0.06)}
+        <script>
+            (function(){
+                const btn = document.getElementById('continueBtn');
+                const overlay = document.getElementById('transitionOverlay');
+                let navigating = false;
 
-				.dock img{width:36px;height:36px;display:block}
-		</style>
-	</head>
-	<body>
-		<main class="center" role="main">
-			<h1>KotakEngine</h1>
-			<p class="lead">Vítej v KotakEngine!</p>
-		</main>
+                function showButton(){
+                    requestAnimationFrame(()=> btn.classList.add('visible'));
+                }
 
-			<div class="version">v1.0.0 BETA</div>
+                if (document.readyState === 'loading'){
+                    document.addEventListener('DOMContentLoaded', ()=> setTimeout(showButton, 2000));
+                } else {
+                    setTimeout(showButton, 500);
+                }
 
-			<button id="continueBtn" class="continue-btn" aria-label="Pokračovat">Pokráčovat</button>
+                function navigateToTarget(url){
+                    if (navigating) return;
+                    navigating = true;
 
-			<!-- overlay used for smooth exit transition -->
-			<div id="transitionOverlay" class="transition-overlay" aria-hidden="true"></div>
+                    // If user prefers reduced motion, skip animation
+                    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+                        window.location.href = url;
+                        return;
+                    }
 
-			<script>
-				(function(){
-					const btn = document.getElementById('continueBtn');
-					const overlay = document.getElementById('transitionOverlay');
-					let navigating = false;
+                    overlay.classList.add('show');
 
-					function showButton(){
-						requestAnimationFrame(()=> btn.classList.add('visible'));
-					}
+                    const computed = getComputedStyle(overlay);
+                    let duration = 600; 
+                    try{
+                        const ms = parseFloat(computed.transitionDuration) * 1000;
+                        if (!isNaN(ms) && ms > 0) duration = ms;
+                    }catch(e){}
 
-					if (document.readyState === 'loading'){
-						document.addEventListener('DOMContentLoaded', ()=> setTimeout(showButton, 2000));
-					} else {
-						setTimeout(showButton, 500);
-					}
+                    // Timeout fallback if transitionend doesn't fire
+                    const timeout = setTimeout(()=>{
+                        window.location.href = url;
+                    }, duration + 50);
 
-					function navigateToTarget(url){
-						if (navigating) return;
-						navigating = true;
+                    overlay.addEventListener('transitionend', function onEnd(e){
+                        if (e.target === overlay && e.propertyName === 'transform'){
+                            overlay.removeEventListener('transitionend', onEnd);
+                            clearTimeout(timeout);
+                            window.location.href = url;
+                        }
+                    });
+                }
 
-						// If user prefers reduced motion, skip animation
-						if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-							window.location.href = url;
-							return;
-						}
-
-						overlay.classList.add('show');
-
-						// Wait for transition to end, but fallback to timeout
-						const computed = getComputedStyle(overlay);
-						let duration = 600; // default matches CSS
-						try{
-							const ms = parseFloat(computed.transitionDuration) * 1000;
-							if (!isNaN(ms) && ms > 0) duration = ms;
-						}catch(e){}
-
-						const timeout = setTimeout(()=>{
-							window.location.href = url;
-						}, duration + 40);
-
-						overlay.addEventListener('transitionend', function onEnd(e){
-							if (e.target === overlay && e.propertyName === 'transform'){
-								overlay.removeEventListener('transitionend', onEnd);
-								clearTimeout(timeout);
-								window.location.href = url;
-							}
-						});
-					}
-
-					btn.addEventListener('click', ()=>{
-						btn.disabled = true;
-						navigateToTarget('/launcher.html');
-					});
-				})();
-			</script>
-	</body>
-
+                btn.addEventListener('click', ()=>{
+                    btn.disabled = true;
+                    // Změna na relativní cestu bez počátečního lomítka
+                    navigateToTarget('launcher.html');
+                });
+            })();
+        </script>
+    </body>
 </html>
-
