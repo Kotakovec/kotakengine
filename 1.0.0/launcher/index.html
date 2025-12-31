@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>KotakEngine — Aplikace</title>
+    <style>
+      :root{--bg-top:#000000;--bg-bottom:#4b0082;--fg:#f6f6fb;--muted:rgba(246,246,251,0.7)}
+      html,body{height:100%;margin:0}
+      body{
+        font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+        color:var(--fg);
+        background:linear-gradient(180deg,var(--bg-top) 0%, var(--bg-bottom) 100%);
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        position:relative;
+        overflow:hidden;
+      }
+
+      .version{position:fixed;left:12px;bottom:12px;font-size:12px;color:var(--muted);user-select:none;pointer-events:none}
+
+      /* entrance overlay */
+      .transition-overlay{position:fixed;left:0;right:0;top:0;bottom:0;background:linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);transform:translateY(0);pointer-events:auto;transition:transform 600ms ease;z-index:9999}
+      .transition-overlay.revealed{transform:translateY(100%);pointer-events:none}
+
+      /* DOCK - OPRAVA: Extrémně vysoký z-index pro celou lištu */
+      .dock{
+        position:fixed;
+        left:12px;
+        top:50%;
+        transform:translateY(-50%);
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+        z-index:99999; 
+      }
+
+      .dock a{
+        display:block;
+        width:56px;
+        height:56px;
+        border-radius:12px;
+        background:rgba(255,255,255,0.03);
+        border:1px solid rgba(255,255,255,0.06);
+        padding:6px;box-sizing:border-box;
+        display:flex;align-items:center;justify-content:center;
+        transition:transform 140ms cubic-bezier(.2,.9,.2,1), background 180ms ease;
+        transform-origin:left center;
+        will-change:transform;
+        position:relative;
+      }
+
+      .dock a:hover{transform:translateX(6px) scale(1.03);background:rgba(255,255,255,0.06)}
+      .dock img{width:36px;height:36px;display:block;transition:transform 140ms cubic-bezier(.2,.9,.2,1)}
+
+      .dock a .min-dot{
+        position:absolute;
+        left:-12px;
+        top:50%;
+        transform:translateY(-50%);
+        width:8px;height:8px;border-radius:50%;background:#fff;display:none;box-shadow:0 0 6px rgba(255,255,255,0.9);
+      }
+
+      /* GLASS FRAME */
+      .glass-frame{
+        position:fixed;
+        left:80px;
+        right:10px;
+        top:10px;
+        bottom:10px;
+        border-radius:10px;
+        background:rgba(255,255,255,0.02);
+        border:1px solid rgba(255,255,255,0.06);
+        box-shadow:0 6px 20px rgba(0,0,0,0.25) inset;
+        pointer-events:none;
+        z-index:9000;
+      }
+
+      /* FRAME WINDOW - Musí být pod dockem */
+      .frame-window{
+        position:fixed;
+        left:85px;
+        right:15px;
+        top:15px;
+        bottom:15px;
+        border-radius:8px;
+        overflow:hidden;
+        background:rgba(20, 20, 20, 0.95);
+        box-shadow:0 8px 30px rgba(0,0,0,0.5);
+        z-index:10001;
+        transform:scale(0.98) translateY(6px);
+        opacity:0;
+        transition:transform 220ms ease, opacity 180ms ease;
+        pointer-events:none;
+      }
+
+      .frame-window.visible{transform:none;opacity:1;pointer-events:auto;}
+      .frame-window.minimizing{transform:translateX(-120%) scale(0.9);opacity:0;pointer-events:none}
+
+      .frame-minimize{position:absolute;top:2px;right:38px;z-index:10003;background:rgba(255,200,0,0.9);border:0;color:var(--fg);width:32px;height:32px;border-radius:50%;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition: transform 120ms ease}
+      .frame-close{position:absolute;top:2px;right:2px;z-index:10004;background:rgba(255,0,0,0.95);border:0;color:var(--fg);width:32px;height:32px;border-radius:50%;cursor:pointer; font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition: transform 120ms ease}
+      
+      .frame-window iframe{width:100%;height:100%;border:0;display:block}
+    </style>
+  </head>
+  <body>
+    <div class="version">v1.0.0 BETA</div>
+
+    <nav class="dock" aria-label="Dock">
+      <a href="/1.0.0/app/1.html"><img src="/1.0.0/icon/1.png" alt="Aplikace 1"/></a>
+      <a href="/1.0.0/app/2.html"><img src="/1.0.0/icon/2.png" alt="Aplikace 2"/></a>
+      <a href="/1.0.0/app/3.html"><img src="/1.0.0/icon/3.png" alt="Aplikace 3"/></a>
+    </nav>
+
+    <div class="glass-frame" aria-hidden="true"></div>
+
+    <div id="frameWindow" class="frame-window" aria-hidden="true">
+      <button id="frameMinimize" class="frame-minimize" aria-label="Minimalizovat">—</button>
+      <button id="frameClose" class="frame-close" aria-label="Zavřít">✕</button>
+      <iframe id="frameIframe" src="about:blank" frameborder="0" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
+    </div>
+
+    <div id="overlay" class="transition-overlay" aria-hidden="true"></div>
+
+    <script>
+      (function(){
+        const overlay = document.getElementById('overlay');
+        const frameWindow = document.getElementById('frameWindow');
+        const frameIframe = document.getElementById('frameIframe');
+        const frameClose = document.getElementById('frameClose');
+        const frameMinimize = document.getElementById('frameMinimize');
+        let lastDockLink = null;
+
+        function openInFrame(url){
+          if (!frameWindow || !frameIframe) return;
+          frameIframe.src = url;
+          frameWindow.classList.add('visible');
+          frameWindow.setAttribute('aria-hidden','false');
+          if (lastDockLink){ 
+            const d = lastDockLink.querySelector('.min-dot'); 
+            if (d) d.style.display = 'none'; 
+          }
+        }
+
+        function animateAway(showDot){
+          if (!frameWindow) return;
+          frameWindow.classList.add('minimizing');
+          setTimeout(() => {
+            frameWindow.classList.remove('visible', 'minimizing');
+            frameWindow.setAttribute('aria-hidden','true');
+            if (showDot && lastDockLink){ 
+              const d = lastDockLink.querySelector('.min-dot'); 
+              if (d) d.style.display = 'block'; 
+            }
+            frameIframe.src = 'about:blank';
+          }, 300);
+        }
+
+        document.querySelectorAll('.dock a').forEach(link => {
+          if (!link.querySelector('.min-dot')){
+            const dot = document.createElement('span'); 
+            dot.className = 'min-dot'; 
+            link.appendChild(dot);
+          }
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            lastDockLink = this;
+            const existing = this.querySelector('.min-dot'); 
+            if (existing) existing.style.display = 'none';
+            openInFrame(this.getAttribute('href'));
+          });
+        });
+
+        // OPRAVENÁ MAGNIFIKACE - z-index teď neblbne
+        (function(){
+          const dock = document.querySelector('.dock');
+          if (!dock) return;
+          const items = Array.from(dock.querySelectorAll('a'));
+          const maxScale = 2.0;
+          const radius = 120;
+          let raf = 0;
+
+          function applyProximity(clientY){
+            items.forEach(el=>{
+              const rect = el.getBoundingClientRect();
+              const center = rect.top + rect.height/2;
+              const d = Math.abs(clientY - center);
+              let k = Math.max(0, 1 - d / radius);
+              k = Math.pow(k, 1.15);
+              const scale = 1 + k * (maxScale - 1);
+              const tx = Math.min(18, (scale - 1) * 18);
+              el.style.transform = `translateX(${tx}px) scale(${scale})`;
+              // OPRAVA: z-index zůstává v hladině nad oknem (10001+)
+              el.style.zIndex = 100000 + Math.round(scale * 10); 
+              const img = el.querySelector('img');
+              if (img) img.style.transform = `scale(${1 + k * 0.35})`;
+            });
+          }
+
+          function onPointerMove(e){
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            if (raf) cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(()=> applyProximity(clientY));
+          }
+
+          function reset(){
+            if (raf) cancelAnimationFrame(raf);
+            items.forEach(el=>{ el.style.transform = ''; el.style.zIndex = ''; const img = el.querySelector('img'); if (img) img.style.transform = ''; });
+          }
+
+          dock.addEventListener('pointermove', onPointerMove);
+          dock.addEventListener('pointerleave', reset);
+          dock.addEventListener('touchmove', onPointerMove, {passive:true});
+        })();
+
+        if (frameClose) frameClose.addEventListener('click', () => animateAway(false));
+        if (frameMinimize) frameMinimize.addEventListener('click', () => animateAway(true));
+
+        function reveal(){
+          setTimeout(()=> overlay.classList.add('revealed'), 20);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reveal);
+        else reveal();
+      })();
+    </script>
+  </body>
+</html>
