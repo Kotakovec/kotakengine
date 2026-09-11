@@ -1,200 +1,1190 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KotakEngine</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>KotakEngine</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 30, 49, 0.78);
+      --card-border: rgba(99, 102, 241, 0.25);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #06b6d4;
+      --accent-glow: rgba(6, 182, 212, 0.35);
+      --lock-color: #f59e0b;
+      --lock-hover: #d97706;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 18px;
+    }
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="logo.png">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
 
-    <style>
-        :root { --primary: #4caf50; --bg: #000; --card-bg: #111; }
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            background-color: var(--bg); color: white; 
-            font-family: sans-serif; overflow: hidden; 
-        }
+    input, textarea {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
 
-        /* 1. INSTALAČNÍ OBRAZOVKA */
-        #install-screen { 
-            display: none; flex-direction: column; align-items: center; 
-            justify-content: center; height: 100vh; text-align: center; 
-            padding: 30px; box-sizing: border-box; 
-        }
-        .logo-img { 
-            width: 120px; height: 120px; border-radius: 25px; 
-            margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
-            background-image: url('logo.png'); background-size: cover; background-position: center; 
-        }
-        #btn-install { 
-            display: none; background: var(--primary); color: #000; 
-            border: none; padding: 18px 40px; border-radius: 30px; 
-            font-weight: bold; font-size: 16px; margin: 20px 0; cursor: pointer; 
-        }
-        .instruction-box { 
-            background: var(--card-bg); padding: 20px; border-radius: 20px; 
-            border: 1px solid #222; max-width: 320px; font-size: 13px; color: #888; 
-        }
+    html, body {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: pan-x pan-y;
+    }
 
-        /* 2. ÚDRŽBOVÁ OBRAZOVKA */
-        #maintenance-overlay {
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; background: #000; color: white; text-align: center;
-        }
-        .m-container { 
-            width: 85%; max-width: 400px; padding: 40px 30px; 
-            border: 1px solid #222; border-radius: 40px; background: #111; 
-        }
-        .m-icon { font-size: 50px; margin-bottom: 20px; }
-        .m-title { color: var(--primary); margin: 0 0 10px 0; font-size: 1.5rem; }
-        .loader-bar { width: 100%; height: 10px; background: #1a1a1a; margin-top: 30px; border-radius: 20px; overflow: hidden; border: 1px solid #333; }
-        #progress-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.5s linear; box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
+    body {
+      background: #000000;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      position: relative;
+    }
 
-        /* TEXTOVÉ INFO SEKCE */
-        .info-update { margin-top: 30px; color: var(--primary); font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        #maintenance-info { margin-top: 10px; color: #ccc; font-size: 14px; line-height: 1.5; padding: 0 10px; }
-        #maintenance-timer { margin-top: 15px; color: #555; font-size: 12px; }
 
-        /* 3. HLAVNÍ APP KONTEJNER */
-        #main-app-container { display: none; width: 100%; height: 100%; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Centered KotakEngine Header */
+    header {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .engine-logo-img {
+      width: 130px;
+      height: 130px;
+      object-fit: contain;
+      margin-bottom: 0.75rem;
+      filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.35));
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .engine-logo-img:hover {
+      transform: scale(1.04);
+    }
+
+    h1.engine-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 75%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Main Card */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 25px rgba(99, 102, 241, 0.08);
+      overflow: hidden;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Dropzone Area directly below header */
+    .dropzone {
+      border: 2px dashed rgba(99, 102, 241, 0.4);
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 14px;
+      padding: 2.25rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(6, 182, 212, 0.06);
+      transform: scale(1.005);
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .icon-box {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .icon-box svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .dropzone-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text);
+    }
+
+    .dropzone-hint {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Selected File Item */
+    .file-details {
+      display: none;
+      background: rgba(10, 15, 29, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+
+    .file-icon {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent);
+      padding: 9px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .file-meta {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 440px;
+    }
+
+    .file-size {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .btn-remove {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: color 0.2s;
+    }
+
+    .btn-remove:hover {
+      color: var(--danger);
+    }
+
+    /* 3 Action Stack Buttons Under Dropzone */
+    .buttons-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .action-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.22s ease;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+    }
+
+    /* Button 1: .kotak */
+    .btn-kotak {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+
+    /* Password Input Container (replaces Button 1 when .ppkotak is clicked) */
+    .pwd-input-card {
+      display: none;
+      height: 52px;
+      background: rgba(10, 15, 29, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 12px;
+      padding: 0 14px;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pwd-input-card input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .pwd-input-card input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .pwd-input-card .btn-icon-inside {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+    }
+
+    .pwd-input-card .btn-icon-inside:hover {
+      color: #fff;
+    }
+
+    /* Button 2: .ppkotak / Confirm */
+    /* Button 2: .ppkotak / Confirm */
+    .btn-ppkotak {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-ppkotak.confirm-state {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+
+
+    /* Extract Mode Button (visible only in Extract tab) */
+    .btn-extract {
+      display: none;
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+    }
+
+    /* Extract Password row (when unpacking .ppkotak) */
+    .extract-pwd-row {
+      display: none;
+      background: rgba(10, 15, 29, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 12px;
+      padding: 0 14px;
+      height: 52px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .extract-pwd-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    /* Status notification */
+    .status-msg {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-msg.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+
+    .status-msg.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+
+    /* Result Section */
+    .result-section {
+      display: none;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+  .result-box {
+      background: #060911;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+
+  </style>
 </head>
 <body>
 
-    <div id="install-screen">
-        <div class="logo-img"></div>
-        <h1 style="margin-bottom: 5px;">KotakEngine</h1>
-        <p style="color: #666; margin-top: 0;">Aplikace vyžaduje spuštění z plochy.</p>
-        <button id="btn-install">INSTALOVAT TEĎ</button>
-        <div class="instruction-box">
-            <b style="color: #fff;">iPhone:</b> Klepni na ikonu sdílení a zvol "Přidat na plochu".<br><br>
-            <b style="color: #fff;">Android:</b> Klepni na tři tečky a zvol "Instalovat aplikaci".
+  <div class="container">
+    <!-- Header with centered Logo and KotakEngine -->
+    <header>
+      <img src="logo.png" alt="KotakEngine Logo" class="engine-logo-img" />
+      <h1 class="engine-title">KotakEngine</h1>
+      <p class="subtitle">Bezpečné šifrování souborů</p>
+    </header>
+
+    <div class="card">
+      <!-- Drag & Drop Zone directly under Header -->
+      <div class="dropzone" id="dropArea">
+        <input type="file" id="fileInput" />
+        <div class="icon-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
         </div>
-    </div>
+        <div class="dropzone-title" id="dropTitle">Přetáhněte sem libovolný soubor nebo klikněte</div>
+        <div class="dropzone-hint" id="dropHint">Podporuje jakýkoli formát: JPG, PNG, PDF, MP4, MP3, TXT, DOCX, ZIP...</div>
+      </div>
 
-    <div id="maintenance-overlay">
-        <div class="m-container">
-            <div class="m-icon">🛠️</div>
-            <h1 class="m-title">Údržba systému</h1>
-            <p style="color: #888; font-size: 14px;">Právě probíhá aktualizace softwaru.</p>
-            
-            <div class="loader-bar"><div id="progress-fill"></div></div>
-            
-            <div class="info-update">Info:</div>
-            <div id="maintenance-info">Načítání informací o updatu...</div>
+      <!-- Selected File Details -->
+      <div class="file-details" id="fileDetails">
+        <div class="file-info">
+          <div class="file-icon">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="file-meta">
+            <div class="file-name" id="selectedFileName">soubor.ext</div>
+            <div class="file-size" id="selectedFileSize">0 KB</div>
+          </div>
         </div>
+        <button class="btn-remove" title="Odebrat soubor" onclick="clearSelectedFile()">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Buttons Stack Directly Under Dropzone -->
+      <div class="buttons-stack" id="convertButtonsStack">
+        <!-- Slot 1: Normal .kotak Button OR Password Input field -->
+        <button class="action-btn btn-kotak" id="btnKotak" onclick="executeConvertKotak()" disabled>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <span>Převést na .kotak</span>
+        </button>
+
+        <!-- Password input textbox replacing Button 1 when .ppkotak mode is active -->
+        <div class="pwd-input-card" id="pwdInputCard">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#f59e0b">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <input type="password" id="ppkotakPasswordInput" placeholder="Zadejte heslo pro šifrování..." autocomplete="off" />
+          <button type="button" class="btn-icon-inside" onclick="togglePasswordVisibility('ppkotakPasswordInput')" title="Zobrazit/skrýt heslo">
+            <svg id="pwdEyeIcon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+          <button type="button" class="btn-icon-inside" onclick="cancelPpkotakMode()" title="Zrušit">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Slot 2: .ppkotak Button (switches to Confirm when clicked) -->
+        <button class="action-btn btn-ppkotak" id="btnPpkotak" onclick="handlePpkotakClick()" disabled>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="ppkotakIcon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span id="ppkotakBtnText">Převést na .ppkotak (s heslem)</span>
+        </button>
+      </div>
+
+      <!-- Extract Mode Elements (Password row if .ppkotak + Extract button) -->
+      <div class="extract-pwd-row" id="extractPwdRow">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#f59e0b">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <input type="password" id="extractPasswordInput" placeholder="Zadejte heslo pro odemčení .ppkotak..." autocomplete="off" />
+        <button type="button" class="pwd-input-card btn-icon-inside" onclick="togglePasswordVisibility('extractPasswordInput')">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+      </div>
+
+      <button class="action-btn btn-extract" id="btnExtract" onclick="executeExtract()" disabled>
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        <span id="btnExtractText">Rozbalit soubor</span>
+      </button>
+
+      <!-- Status notification -->
+      <div id="statusMsg" class="status-msg"></div>
+
+      <!-- Inspection result viewer -->
+      <div class="result-section" id="resultSection">
+        <h4 style="margin-bottom: 0.6rem; font-size: 0.9rem; color: #a5b4fc;">Podrobnosti o souboru:</h4>
+        <div class="result-box" id="resultBox"></div>
+      </div>
     </div>
+  </div>
 
-    <div id="main-app-container">
-        <iframe id="main-frame" src=""></iframe>
-    </div>
+  <script>
+    // Magic headers
+    const KOTAK_MAGIC = new Uint8Array([0x4B, 0x4F, 0x54, 0x41, 0x4B, 0x01]);
+    const PPKOTAK_MAGIC = new Uint8Array([0x50, 0x50, 0x4B, 0x54, 0x4B, 0x01]);
+    const PPZAKOTAK_MAGIC = new Uint8Array([0x50, 0x50, 0x5A, 0x41, 0x4B, 0x01]);
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    let currentMode = 'convert'; // 'convert' or 'extract'
+    let selectedFile = null;
+    let isPpkotakActive = false; // whether password input mode for .ppkotak is active
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlgu2gdLYiAtqMlN2ABprU6rrXS-w5JfI",
-            authDomain: "kotakengine.firebaseapp.com",
-            databaseURL: "https://kotakengine-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "kotakengine",
-            storageBucket: "kotakengine.firebasestorage.app",
-            messagingSenderId: "165516964834",
-            appId: "1:165516964834:web:2d3089665eefa76d9bffbb",
-            measurementId: "G-ZSM0GF21LL"
-        };
+    // DOM Elements
+    const fileInput = document.getElementById('fileInput');
+    const dropArea = document.getElementById('dropArea');
+    const dropTitle = document.getElementById('dropTitle');
+    const dropHint = document.getElementById('dropHint');
+    const fileDetails = document.getElementById('fileDetails');
+    const selectedFileName = document.getElementById('selectedFileName');
+    const selectedFileSize = document.getElementById('selectedFileSize');
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const convertButtonsStack = document.getElementById('convertButtonsStack');
+    const btnKotak = document.getElementById('btnKotak');
+    const pwdInputCard = document.getElementById('pwdInputCard');
+    const ppkotakPasswordInput = document.getElementById('ppkotakPasswordInput');
+    const btnPpkotak = document.getElementById('btnPpkotak');
+    const ppkotakBtnText = document.getElementById('ppkotakBtnText');
 
-        let maintenanceStart = 0;
-        let maintenanceEnd = 0;
+    const extractPwdRow = document.getElementById('extractPwdRow');
+    const extractPasswordInput = document.getElementById('extractPasswordInput');
+    const btnExtract = document.getElementById('btnExtract');
+    const btnExtractText = document.getElementById('btnExtractText');
 
-        const installScreen = document.getElementById('install-screen');
-        const maintenanceOverlay = document.getElementById('maintenance-overlay');
-        const mainAppContainer = document.getElementById('main-app-container');
-        const mainFrame = document.getElementById('main-frame');
-        const fill = document.getElementById('progress-fill');
-        const timerText = document.getElementById('maintenance-timer');
-        const infoText = document.getElementById('maintenance-info');
+    const statusMsg = document.getElementById('statusMsg');
+    const resultSection = document.getElementById('resultSection');
+    const resultBox = document.getElementById('resultBox');
 
-        function updateUIVisibility() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            const now = new Date().getTime();
+    // Switch between Convert and Extract modes (handled automatically by file type)
+    function switchMode(mode, resetFile = true) {
+      currentMode = mode;
 
-            if (!isStandalone) {
-                installScreen.style.display = "flex";
-                maintenanceOverlay.style.display = "none";
-                mainAppContainer.style.display = "none";
-                return;
-            }
+      if (resetFile) {
+        clearSelectedFile();
+      }
+      hideStatus();
+      resultSection.style.display = 'none';
+      cancelPpkotakMode();
 
-            if (maintenanceStart > 0 && now >= maintenanceStart && now < maintenanceEnd) {
-                installScreen.style.display = "none";
-                mainAppContainer.style.display = "none";
-                maintenanceOverlay.style.display = "flex";
+      if (mode === 'convert') {
+        dropTitle.textContent = 'Přetáhněte sem libovolný soubor nebo klikněte';
+        dropHint.textContent = 'Podporuje jakýkoli formát: JPG, PNG, PDF, MP4, MP3, TXT, DOCX, ZIP...';
+        convertButtonsStack.style.display = 'flex';
+        extractPwdRow.style.display = 'none';
+        btnExtract.style.display = 'none';
+      } else {
+        dropTitle.textContent = 'Přetáhněte sem soubor .kotak, .ppkotak, .zakotak nebo .ppzakotak';
+        dropHint.textContent = 'Rozbalení kontejneru do původního souboru';
+        convertButtonsStack.style.display = 'none';
+        btnExtract.style.display = 'inline-flex';
+        extractPwdRow.style.display = 'none';
+      }
+    }
 
-                if (mainFrame.src !== "") mainFrame.src = ""; 
+    // Drag & Drop
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.add('dragover');
+      });
+    });
 
-                const total = maintenanceEnd - maintenanceStart;
-                const elapsed = now - maintenanceStart;
-                let percent = (elapsed / total) * 100;
-                fill.style.width = Math.min(percent, 100) + "%";
-                
-                const remainSec = Math.round((maintenanceEnd - now) / 1000);
-                timerText.innerText = remainSec > 0 ? `Aktualizace skončí za cca ${remainSec}s` : "Dokončování...";
-            } else {
-                installScreen.style.display = "none";
-                maintenanceOverlay.style.display = "none";
-                mainAppContainer.style.display = "block";
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.remove('dragover');
+      });
+    });
 
-                if (!mainFrame.src.includes("main.html")) {
-                    mainFrame.src = "main.html?v=" + now;
-                }
-            }
+    dropArea.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFileSelection(e.target.files[0]);
+      }
+    });
+
+    function getCleanFileName(fileOrName) {
+      const rawName = typeof fileOrName === 'string' ? fileOrName : (fileOrName?.name || '');
+      const parts = rawName.split(/[\/\\]/);
+      const clean = parts[parts.length - 1].trim();
+      return clean || 'soubor';
+    }
+
+    function handleFileSelection(file) {
+      const cleanName = getCleanFileName(file);
+      const nameLower = cleanName.toLowerCase();
+      const isKotakFormat = nameLower.endsWith('.kotak') || nameLower.endsWith('.ppkotak') || nameLower.endsWith('.zakotak') || nameLower.endsWith('.ppzakotak');
+
+      // Auto-switch to extract mode if any kotak format is dropped/uploaded
+      if (isKotakFormat && currentMode !== 'extract') {
+        switchMode('extract', false);
+      } else if (!isKotakFormat && currentMode === 'extract') {
+        // If a non-kotak file is dropped while in extract mode, auto-switch to convert mode
+        switchMode('convert', false);
+      }
+
+      if (currentMode === 'extract') {
+        if (!isKotakFormat) {
+          showStatus('Vybraný soubor musí mít příponu <strong>.kotak</strong>, <strong>.ppkotak</strong>, <strong>.zakotak</strong> nebo <strong>.ppzakotak</strong>!', 'error');
+          return;
         }
 
-        const maintenanceRef = ref(db, 'settings/maintenance');
-        onValue(maintenanceRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                maintenanceStart = new Date(data.startTime).getTime();
-                maintenanceEnd = new Date(data.endTime).getTime();
-                
-                // TADY SE NAČÍTÁ INFO TEXT Z FIREBASE
-                if (data.updateInfo) {
-                    infoText.innerText = data.updateInfo;
-                } else {
-                    infoText.innerText = "Žádné podrobnosti nejsou k dispozici.";
-                }
+        if (nameLower.endsWith('.ppkotak') || nameLower.endsWith('.ppzakotak')) {
+          extractPwdRow.style.display = 'flex';
+          extractPasswordInput.value = '';
+          extractPasswordInput.placeholder = nameLower.endsWith('.ppzakotak') ? 'Zadejte heslo pro odemčení .ppzakotak...' : 'Zadejte heslo pro odemčení .ppkotak...';
+          extractPasswordInput.focus();
+          btnExtractText.textContent = nameLower.endsWith('.ppzakotak') ? 'Dešifrovat a rozbalit .ppzakotak' : 'Dešifrovat a rozbalit .ppkotak';
+        } else if (nameLower.endsWith('.zakotak')) {
+          extractPwdRow.style.display = 'none';
+          btnExtractText.textContent = 'Rozbalit .zakotak';
+        } else {
+          extractPwdRow.style.display = 'none';
+          btnExtractText.textContent = 'Rozbalit .kotak';
+        }
+        btnExtract.disabled = false;
+      } else {
+        btnKotak.disabled = false;
+        btnPpkotak.disabled = false;
+      }
 
-                console.log("Data z DB aktualizována!");
-                updateUIVisibility();
+      selectedFile = file;
+      selectedFileName.textContent = cleanName;
+      selectedFileSize.textContent = formatBytes(file.size);
+      fileDetails.style.display = 'flex';
+      hideStatus();
+      resultSection.style.display = 'none';
+    }
+
+    function clearSelectedFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      fileDetails.style.display = 'none';
+      btnKotak.disabled = true;
+      btnPpkotak.disabled = true;
+      btnExtract.disabled = true;
+      cancelPpkotakMode();
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+      if (!+bytes) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
+
+    function showStatus(text, type) {
+      statusMsg.className = `status-msg ${type}`;
+      statusMsg.innerHTML = text;
+      statusMsg.style.display = 'flex';
+    }
+
+    function hideStatus() {
+      statusMsg.style.display = 'none';
+    }
+
+    function togglePasswordVisibility(id) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+
+    // Click handler for button 2 (.ppkotak / Confirm)
+    function handlePpkotakClick() {
+      if (!selectedFile) return;
+
+      if (!isPpkotakActive) {
+        // Step 1: Open password textbox (Button 1 becomes textbox, Button 2 becomes Confirm)
+        isPpkotakActive = true;
+        btnKotak.style.display = 'none';
+        pwdInputCard.style.display = 'flex';
+        ppkotakPasswordInput.value = '';
+        ppkotakPasswordInput.focus();
+
+        btnPpkotak.classList.add('confirm-state');
+        ppkotakBtnText.textContent = 'Potvrdit a zašifrovat';
+      } else {
+        // Step 2: Confirm clicked! Validate and encrypt
+        const password = ppkotakPasswordInput.value.trim();
+        if (!password) {
+          showStatus('Zadejte prosím heslo pro zašifrování!', 'error');
+          ppkotakPasswordInput.focus();
+          return;
+        }
+        executeConvertPpkotak(password);
+      }
+    }
+
+    function cancelPpkotakMode() {
+      isPpkotakActive = false;
+      btnKotak.style.display = 'inline-flex';
+      pwdInputCard.style.display = 'none';
+      btnPpkotak.classList.remove('confirm-state');
+      ppkotakBtnText.textContent = 'Převést na .ppkotak (s heslem)';
+      ppkotakPasswordInput.value = '';
+    }
+
+    // SHA-256 calculation
+    async function calculateSHA256(arrayBuffer) {
+      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Key derivation via PBKDF2 (100,000 rounds)
+    async function deriveAesKey(password, salt) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(password),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveKey']
+      );
+
+      return crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    // Button 1 action: Convert directly to .kotak (without password)
+    async function executeConvertKotak() {
+      if (!selectedFile) return;
+
+      btnKotak.disabled = true;
+      btnPpkotak.disabled = true;
+      btnKotak.innerHTML = 'Zpracovávám...';
+
+      try {
+        const cleanName = getCleanFileName(selectedFile);
+        const buffer = await selectedFile.arrayBuffer();
+        const sha256 = await calculateSHA256(buffer);
+
+        const metadata = {
+          version: "1.0",
+          originalName: cleanName,
+          originalType: selectedFile.type || "application/octet-stream",
+          originalSize: selectedFile.size,
+          engine: "KotakEngine",
+          createdAt: new Date().toISOString(),
+          sha256: sha256
+        };
+
+        const lastDot = cleanName.lastIndexOf('.');
+        const baseWithoutExt = lastDot > 0 ? cleanName.substring(0, lastDot) : cleanName;
+        const outFilename = `${baseWithoutExt}.kotak`;
+
+        const metaBytes = new TextEncoder().encode(JSON.stringify(metadata));
+        const metaLengthBuffer = new ArrayBuffer(4);
+        new DataView(metaLengthBuffer).setUint32(0, metaBytes.byteLength, false);
+
+        const outputBlob = new Blob([
+          KOTAK_MAGIC,
+          metaLengthBuffer,
+          metaBytes,
+          buffer
+        ], { type: 'application/octet-stream' });
+
+        downloadFile(outputBlob, outFilename);
+
+        showStatus(`🎉 Soubor byl úspěšně zabalen jako <strong>${outFilename}</strong>!`, 'success');
+
+        resultSection.style.display = 'block';
+        resultBox.textContent = `Původní soubor: ${cleanName}\n` +
+          `Výstupní soubor: ${outFilename}\n` +
+          `Typ: Binární kontejner .kotak\n` +
+          `Velikost: ${formatBytes(outputBlob.size)}\n` +
+          `SHA-256 součet: ${sha256}\n\n` +
+          `Metadata:\n` + JSON.stringify(metadata, null, 2);
+
+      } catch (err) {
+        showStatus('Chyba: ' + err.message, 'error');
+      } finally {
+        btnKotak.disabled = false;
+        btnPpkotak.disabled = false;
+        btnKotak.innerHTML = `
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <span>Převést na .kotak</span>
+        `;
+      }
+    }
+
+    // Button 2 Confirm action: Encrypt to .ppkotak with 10 random digits
+    async function executeConvertPpkotak(password) {
+      if (!selectedFile) return;
+
+      btnPpkotak.disabled = true;
+      ppkotakBtnText.textContent = 'Šifruji...';
+
+      try {
+        const cleanName = getCleanFileName(selectedFile);
+        const buffer = await selectedFile.arrayBuffer();
+        const sha256 = await calculateSHA256(buffer);
+
+        const metadata = {
+          version: "1.0",
+          originalName: cleanName,
+          originalType: selectedFile.type || "application/octet-stream",
+          originalSize: selectedFile.size,
+          engine: "KotakEngine",
+          createdAt: new Date().toISOString(),
+          sha256: sha256
+        };
+
+        const random10Digits = Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)).join('');
+        const outFilename = `${random10Digits}.ppkotak`;
+
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const aesKey = await deriveAesKey(password, salt);
+
+        const metaBytes = new TextEncoder().encode(JSON.stringify(metadata));
+        const innerPayloadLength = 4 + metaBytes.byteLength + buffer.byteLength;
+        const innerBuffer = new Uint8Array(innerPayloadLength);
+
+        const innerView = new DataView(innerBuffer.buffer);
+        innerView.setUint32(0, metaBytes.byteLength, false);
+        innerBuffer.set(metaBytes, 4);
+        innerBuffer.set(new Uint8Array(buffer), 4 + metaBytes.byteLength);
+
+        const ciphertext = await crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv: iv },
+          aesKey,
+          innerBuffer
+        );
+
+        const cipherLenBuffer = new ArrayBuffer(4);
+        new DataView(cipherLenBuffer).setUint32(0, ciphertext.byteLength, false);
+
+        const outputBlob = new Blob([
+          PPKOTAK_MAGIC,
+          salt,
+          iv,
+          cipherLenBuffer,
+          ciphertext
+        ], { type: 'application/octet-stream' });
+
+        downloadFile(outputBlob, outFilename);
+
+        showStatus(`🔒 Soubor byl úspěšně zašifrován a stažen jako <strong>${outFilename}</strong>!`, 'success');
+
+        resultSection.style.display = 'block';
+        resultBox.textContent = `Původní soubor: ${cleanName}\n` +
+          `Výstupní soubor: ${outFilename}\n` +
+          `Šifrování: AES-GCM 256-bit (PBKDF2 100 000 iterací)\n` +
+          `Bezpečnost: Zašifrována data i původní název a metadata\n` +
+          `Velikost: ${formatBytes(outputBlob.size)}\n` +
+          `Původní SHA-256: ${sha256}`;
+
+        cancelPpkotakMode();
+
+      } catch (err) {
+        showStatus('Chyba při šifrování: ' + err.message, 'error');
+      } finally {
+        btnPpkotak.disabled = false;
+        if (isPpkotakActive) {
+          ppkotakBtnText.textContent = 'Potvrdit a zašifrovat';
+        } else {
+          ppkotakBtnText.textContent = 'Převést na .ppkotak (s heslem)';
+        }
+      }
+    }
+
+
+
+    // Extract execution for .kotak, .ppkotak, .zakotak, .ppzakotak
+    async function executeExtract() {
+      if (!selectedFile) return;
+
+      btnExtract.disabled = true;
+      btnExtractText.textContent = 'Rozbaluji...';
+
+      try {
+        const buffer = await selectedFile.arrayBuffer();
+        const uint8 = new Uint8Array(buffer);
+
+        // Check if standard ZIP by signature (PK\x03\x04 = 0x50, 0x4B, 0x03, 0x04)
+        const isStandardZip = uint8.length >= 4 && uint8[0] === 0x50 && uint8[1] === 0x4B && uint8[2] === 0x03 && uint8[3] === 0x04;
+
+        let isKotak = uint8.length >= 6;
+        let isPPKotak = uint8.length >= 6;
+        let isPPZakotak = uint8.length >= 6;
+
+        if (uint8.length >= 6) {
+          for (let i = 0; i < 6; i++) {
+            if (uint8[i] !== KOTAK_MAGIC[i]) isKotak = false;
+            if (uint8[i] !== PPKOTAK_MAGIC[i]) isPPKotak = false;
+            if (uint8[i] !== PPZAKOTAK_MAGIC[i]) isPPZakotak = false;
+          }
+        } else {
+          isKotak = false;
+          isPPKotak = false;
+          isPPZakotak = false;
+        }
+
+        let metadata = null;
+        let rawData = null;
+
+        if (isPPZakotak) {
+          // Encrypted Zip Archiv
+          const password = extractPasswordInput.value.trim();
+          if (!password) {
+            extractPasswordInput.focus();
+            throw new Error('Pro odemčení souboru .ppzakotak zadejte heslo!');
+          }
+
+          const salt = uint8.subarray(6, 22);
+          const iv = uint8.subarray(22, 34);
+          const cipherLength = new DataView(buffer).getUint32(34, false);
+          const cipherStart = 38;
+          const cipherEnd = cipherStart + cipherLength;
+
+          if (cipherEnd > buffer.byteLength) {
+            throw new Error('Poškozený soubor: Neplatná délka šifrovaného bloku.');
+          }
+
+          const ciphertext = buffer.slice(cipherStart, cipherEnd);
+          const aesKey = await deriveAesKey(password, salt);
+
+          let decryptedBuffer;
+          try {
+            decryptedBuffer = await crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv: iv },
+              aesKey,
+              ciphertext
+            );
+          } catch (e) {
+            throw new Error('Nesprávné heslo! Data se nepodařilo dešifrovat.');
+          }
+
+          const decView = new DataView(decryptedBuffer);
+          const metaLen = decView.getUint32(0, false);
+          const decUint8 = new Uint8Array(decryptedBuffer);
+
+          const metaText = new TextDecoder('utf-8').decode(decUint8.subarray(4, 4 + metaLen));
+          metadata = JSON.parse(metaText);
+          const zipBuffer = decryptedBuffer.slice(4 + metaLen);
+
+          // Now unzip the decrypted archive
+          const zip = await JSZip.loadAsync(zipBuffer);
+          let targetFileInZip = zip.file(metadata.originalName);
+          if (!targetFileInZip) {
+            // Find first non-meta file in zip
+            const fileNames = Object.keys(zip.files).filter(name => name !== 'kotak_meta.json');
+            if (fileNames.length > 0) {
+              targetFileInZip = zip.file(fileNames[0]);
             }
-        });
+          }
 
-        setInterval(updateUIVisibility, 1000);
+          if (!targetFileInZip) {
+            throw new Error('V archivu nebyl nalezen původní soubor.');
+          }
 
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('btn-install').style.display = 'block';
-        });
+          rawData = await targetFileInZip.async('arraybuffer');
 
-        document.getElementById('btn-install').addEventListener('click', () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
+        } else if (isPPKotak) {
+          const password = extractPasswordInput.value.trim();
+          if (!password) {
+            extractPasswordInput.focus();
+            throw new Error('Pro odemčení souboru .ppkotak zadejte heslo!');
+          }
+
+          const salt = uint8.subarray(6, 22);
+          const iv = uint8.subarray(22, 34);
+          const cipherLength = new DataView(buffer).getUint32(34, false);
+          const cipherStart = 38;
+          const cipherEnd = cipherStart + cipherLength;
+
+          if (cipherEnd > buffer.byteLength) {
+            throw new Error('Poškozený soubor: Neplatná délka šifrovaného bloku.');
+          }
+
+          const ciphertext = buffer.slice(cipherStart, cipherEnd);
+          const aesKey = await deriveAesKey(password, salt);
+
+          let decryptedBuffer;
+          try {
+            decryptedBuffer = await crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv: iv },
+              aesKey,
+              ciphertext
+            );
+          } catch (e) {
+            throw new Error('Nesprávné heslo! Data se nepodařilo dešifrovat.');
+          }
+
+          const decView = new DataView(decryptedBuffer);
+          const metaLen = decView.getUint32(0, false);
+          const decUint8 = new Uint8Array(decryptedBuffer);
+
+          const metaText = new TextDecoder('utf-8').decode(decUint8.subarray(4, 4 + metaLen));
+          metadata = JSON.parse(metaText);
+          rawData = decryptedBuffer.slice(4 + metaLen);
+
+        } else if (isKotak) {
+          const view = new DataView(buffer);
+          const metaLength = view.getUint32(6, false);
+          const metaStart = 10;
+          const metaEnd = metaStart + metaLength;
+
+          if (metaEnd > buffer.byteLength) {
+            throw new Error('Poškozený soubor .kotak: Neplatná délka metadat.');
+          }
+
+          const metaText = new TextDecoder('utf-8').decode(uint8.subarray(metaStart, metaEnd));
+          metadata = JSON.parse(metaText);
+          rawData = buffer.slice(metaEnd);
+
+        } else if (isStandardZip || selectedFile.name.toLowerCase().endsWith('.zakotak')) {
+          // Standard JSZip archive (.zakotak)
+          const zip = await JSZip.loadAsync(buffer);
+          const metaFile = zip.file('kotak_meta.json');
+          if (metaFile) {
+            const metaText = await metaFile.async('text');
+            metadata = JSON.parse(metaText);
+          }
+
+          let targetFileInZip = metadata?.originalName ? zip.file(metadata.originalName) : null;
+          if (!targetFileInZip) {
+            const fileNames = Object.keys(zip.files).filter(name => name !== 'kotak_meta.json');
+            if (fileNames.length > 0) {
+              targetFileInZip = zip.file(fileNames[0]);
+              if (!metadata) {
+                metadata = {
+                  originalName: fileNames[0],
+                  originalType: 'application/octet-stream',
+                  originalSize: targetFileInZip._data?.uncompressedSize || 0
+                };
+              }
             }
-        });
+          }
 
-        window.addEventListener('load', updateUIVisibility);
-    </script>
+          if (!targetFileInZip) {
+            throw new Error('V archivu nebyl nalezen žádný soubor.');
+          }
+
+          rawData = await targetFileInZip.async('arraybuffer');
+
+        } else {
+          throw new Error('Soubor nemá platnou hlavičku KotakEngine ani formát archivu.');
+        }
+
+        // Integrity check
+        let integrityStatus = "Neověřeno";
+        if (metadata && metadata.sha256) {
+          const actualHash = await calculateSHA256(rawData);
+          if (actualHash === metadata.sha256) {
+            integrityStatus = "✅ Shodný (SHA-256 ověřen - soubor je 100% v pořádku)";
+          } else {
+            integrityStatus = "⚠️ CHYBA INTEGRITY! Kontrolní součet nesouhlasí.";
+          }
+        }
+
+        const restoredName = getCleanFileName(metadata?.originalName || 'obnoveny_soubor');
+        const originalBlob = new Blob([rawData], { type: metadata?.originalType || 'application/octet-stream' });
+        downloadFile(originalBlob, restoredName);
+
+        showStatus(`🎉 Soubor <strong>${restoredName}</strong> byl úspěšně obnoven a stažen!`, 'success');
+
+        resultSection.style.display = 'block';
+        resultBox.textContent =
+          `Obnovený soubor: ${restoredName}\n` +
+          `Typ (MIME): ${metadata?.originalType || 'application/octet-stream'}\n` +
+          `Původní velikost: ${formatBytes(metadata?.originalSize || rawData.byteLength)}\n` +
+          `Vytvořeno: ${metadata?.createdAt || 'N/A'}\n` +
+          `Integrita SHA-256: ${integrityStatus}\n\n` +
+          `Metadata:\n` + JSON.stringify(metadata, null, 2);
+
+      } catch (err) {
+        showStatus('Chyba: ' + err.message, 'error');
+      } finally {
+        btnExtract.disabled = false;
+        btnExtractText.textContent = 'Rozbalit soubor';
+      }
+    }
+
+    function downloadFile(blob, filename) {
+      // Direct download to Downloads folder
+      const cleanBlob = blob.type === 'application/octet-stream' ? blob : new Blob([blob], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(cleanBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.setAttribute('download', filename);
+      a.download = filename;
+
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(() => {
+        if (a.parentNode) {
+          document.body.removeChild(a);
+        }
+        URL.revokeObjectURL(url);
+      }, 60000);
+    }
+
+    // Prevent zoom shortcuts (Ctrl/Cmd + Wheel, Ctrl/Cmd + Plus/Minus/0)
+    window.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) {
+        e.preventDefault();
+      }
+    });
+
+    // Prevent multi-touch pinch to zoom
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', (e) => {
+      e.preventDefault();
+    });
+  </script>
 </body>
 </html>
